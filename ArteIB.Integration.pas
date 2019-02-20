@@ -20,7 +20,7 @@ type
      fEventProcessors: TList<TEventProcessor>;
      fEventProcessorEvents: TDictionary<integer,TEventProcessor>;
 
-     const ISStatusSource: string = 'Состояние СИ';
+     const ISStatusSource: string = 'РЎРѕСЃС‚РѕСЏРЅРёРµ РЎР';
 
      procedure ProcessEvent(const AEvent: TIntegrationEvent);
      procedure LoadParams;
@@ -90,14 +90,14 @@ begin
 
  LoadParams;
  Initialize;
- LogInfo('Поток СИ создан.');
+ LogInfo('РџРѕС‚РѕРє РЎР СЃРѕР·РґР°РЅ.');
 end;
 
 destructor TISThread.Destroy;
 var
  eventProcessor: TEventProcessor;
 begin
-  LogInfo('Поток СИ освобождается.');
+  LogInfo('РџРѕС‚РѕРє РЎР РѕСЃРІРѕР±РѕР¶РґР°РµС‚СЃСЏ.');
 
   for eventProcessor in fEventProcessors do
     eventProcessor.Free;
@@ -108,7 +108,7 @@ begin
   IntegrationParams.Free;
   Repo.Free;
 
-  LogInfo('Поток СИ освобожден.');
+  LogInfo('РџРѕС‚РѕРє РЎР РѕСЃРІРѕР±РѕР¶РґРµРЅ.');
 
   inherited;
 end;
@@ -119,7 +119,7 @@ var
   processResult: TEventProcessResult;
   statusInfo: string;
 begin
-  LogInfoFmt('Обрабатывается событие [%s, %d, %d]', [AEvent.Type_.Title, AEvent.Id, AEvent.EntityId]);
+  LogInfoFmt('РћР±СЂР°Р±Р°С‚С‹РІР°РµС‚СЃСЏ СЃРѕР±С‹С‚РёРµ [%s, %d, %d]', [AEvent.Type_.Title, AEvent.Id, AEvent.EntityId]);
 
   processResult := nil;
   statusInfo := '';
@@ -131,7 +131,7 @@ begin
       if Assigned(eventProcessor) then
         processResult := eventProcessor.ProcessEvent(AEvent)
       else
-        LogWarning('Не найден обработчик события.');
+        LogWarning('РќРµ РЅР°Р№РґРµРЅ РѕР±СЂР°Р±РѕС‚С‡РёРє СЃРѕР±С‹С‚РёСЏ.');
 
       if (Not Assigned(processResult)) or (processResult.EventStatusInfo = '') then begin
         AEvent.Status := GetEventProcessStatusSuccess(Repo);
@@ -176,7 +176,7 @@ begin
   integration.StatusInfo := AStatusInfo;
 
   Repo.Flush(integration);
-  LogInfo(Format('СИ [%s] перешел в статус [%s].', [integration.Type_.Title, ifThen(AIsActive, 'Активный', 'Неактивный')]), ISStatusSource, Repo);
+  LogInfo(Format('РЎР [%s] РїРµСЂРµС€РµР» РІ СЃС‚Р°С‚СѓСЃ [%s].', [integration.Type_.Title, ifThen(AIsActive, 'РђРєС‚РёРІРЅС‹Р№', 'РќРµР°РєС‚РёРІРЅС‹Р№')]), ISStatusSource, Repo);
 end;
 
 function TISThread.GetEventProcessInfo(AProcessingEvent: TIntegrationEvent): string;
@@ -187,17 +187,17 @@ begin
 
   case AProcessingEvent.Status.Id of
      epsSuccess:
-       status := 'обработано успешно';
+       status := 'РѕР±СЂР°Р±РѕС‚Р°РЅРѕ СѓСЃРїРµС€РЅРѕ';
      epsErrorsWarnings:
-       status := 'обработано c ошибками/предупреждениями';
+       status := 'РѕР±СЂР°Р±РѕС‚Р°РЅРѕ c РѕС€РёР±РєР°РјРё/РїСЂРµРґСѓРїСЂРµР¶РґРµРЅРёСЏРјРё';
      epsFailed:
-       status := 'не обработано из-за ошибок';
+       status := 'РЅРµ РѕР±СЂР°Р±РѕС‚Р°РЅРѕ РёР·-Р·Р° РѕС€РёР±РѕРє';
 
   end;
 
   if status <> '' then
     Result := Format(
-      'Событие %s [%s, %d, %d]',
+      'РЎРѕР±С‹С‚РёРµ %s [%s, %d, %d]',
       [status, AProcessingEvent.Type_.Title, AProcessingEvent.Id, AProcessingEvent.EntityId]
     )
   else
@@ -214,7 +214,7 @@ begin
   // based on params types IDs (see Constants.pas)
   vInt := Repo.Get<TIntegration>(IntegrationId);
 
-  LogInfo('ПАРАМЕТРЫ ИНТЕГРАЦИИ:');
+  LogInfo('РџРђР РђРњР•РўР Р« РРќРўР•Р“Р РђР¦РР:');
 
   // Set child's needed params by values
   for vIP in vInt.Params do begin
@@ -241,7 +241,7 @@ begin
     if Not EventProcessorEvents.ContainsKey(vEventType) then
       EventProcessorEvents.Add(vEventType, vEventProcessor)
     else
-      raise Exception.CreateFmt('Дублирование подписки на событие [%d] в процессоре [%s].',
+      raise Exception.CreateFmt('Р”СѓР±Р»РёСЂРѕРІР°РЅРёРµ РїРѕРґРїРёСЃРєРё РЅР° СЃРѕР±С‹С‚РёРµ [%d] РІ РїСЂРѕС†РµСЃСЃРѕСЂРµ [%s].',
                    [vEventType, vEventProcessor.ClassName]);
 end;
 
@@ -291,7 +291,7 @@ begin
 
       SetActive;
 
-      LogInfoFmt('Старт рабочего цикла потока СИ [sleep = %d msec]', [sleepWorkCicle]);
+      LogInfoFmt('РЎС‚Р°СЂС‚ СЂР°Р±РѕС‡РµРіРѕ С†РёРєР»Р° РїРѕС‚РѕРєР° РЎР [sleep = %d msec]', [sleepWorkCicle]);
 
       while not Terminated do
       begin
@@ -310,7 +310,7 @@ begin
 
         try
           if processingEventList.Count > 0 then
-            LogInfoFmt('Обрабатывается событий: %d',[processingEventList.Count]);
+            LogInfoFmt('РћР±СЂР°Р±Р°С‚С‹РІР°РµС‚СЃСЏ СЃРѕР±С‹С‚РёР№: %d',[processingEventList.Count]);
 
           for processingEvent in processingEventList do begin
             ProcessEvent(processingEvent);
@@ -325,7 +325,7 @@ begin
     except
       on E: Exception do
       begin
-        LogError('Ошибка в потоке СИ. Поток будет остановлен.', E);
+        LogError('РћС€РёР±РєР° РІ РїРѕС‚РѕРєРµ РЎР. РџРѕС‚РѕРє Р±СѓРґРµС‚ РѕСЃС‚Р°РЅРѕРІР»РµРЅ.', E);
         threadError := E.Message;
       end;
     end;
@@ -339,10 +339,10 @@ begin
     SetActive(False, threadError);
   except
     on E: Exception do
-      LogError('Не удалось сохранить в базе данных финальное состояние потока СИ.', E);
+      LogError('РќРµ СѓРґР°Р»РѕСЃСЊ СЃРѕС…СЂР°РЅРёС‚СЊ РІ Р±Р°Р·Рµ РґР°РЅРЅС‹С… С„РёРЅР°Р»СЊРЅРѕРµ СЃРѕСЃС‚РѕСЏРЅРёРµ РїРѕС‚РѕРєР° РЎР.', E);
   end;
 
-  LogInfo('Поток СИ завершил работу.');
+  LogInfo('РџРѕС‚РѕРє РЎР Р·Р°РІРµСЂС€РёР» СЂР°Р±РѕС‚Сѓ.');
 end;
 
 procedure TISThread.PreExecute;
