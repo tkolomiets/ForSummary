@@ -72,7 +72,7 @@ begin
     RaiseLastOSError;
 end;
 
-// Получение контекста крипто-провайдера
+// РџРѕР»СѓС‡РµРЅРёРµ РєРѕРЅС‚РµРєСЃС‚Р° РєСЂРёРїС‚Рѕ-РїСЂРѕРІР°Р№РґРµСЂР°
 class procedure TCrypto.InitContext(ACryptoPovider: PHCRYPTPROV;
            ACryptoPoviderType: integer; ACryptoPoviderContainer: PWideChar);
 begin
@@ -84,7 +84,7 @@ begin
   CheckCryptoCall(CryptReleaseContext(ACryptoPovider, 0));
 end;
 
-// Вычисление хэша данных
+// Р’С‹С‡РёСЃР»РµРЅРёРµ С…СЌС€Р° РґР°РЅРЅС‹С…
 class function TCrypto.CreateHash(ACryptoProvider: HCRYPTPROV; AData: string): HCRYPTHASH;
 var
   sCanonicalizedData, error: string;
@@ -94,7 +94,7 @@ var
   res : HRESULT;
 begin
   try
-    // Канонинзация данных на основе COM-объекта канонизации (c#)
+    // РљР°РЅРѕРЅРёРЅР·Р°С†РёСЏ РґР°РЅРЅС‹С… РЅР° РѕСЃРЅРѕРІРµ COM-РѕР±СЉРµРєС‚Р° РєР°РЅРѕРЅРёР·Р°С†РёРё (c#)
 
     pCanonicalizedData := Canonicalizer.TransformXmlToC14n(AData);
     Count := SafeArrayGetDim(pCanonicalizedData);
@@ -111,14 +111,14 @@ begin
       end;
 
       if Not error.IsEmpty then
-        raise Exception.CreateFmt('Канонизация данных хэша: %s.', [error]);
+        raise Exception.CreateFmt('РљР°РЅРѕРЅРёР·Р°С†РёСЏ РґР°РЅРЅС‹С… С…СЌС€Р°: %s.', [error]);
     end;
 
     i := sCanonicalizedData.LastIndexOf('>');
     sCanonicalizedData := sCanonicalizedData.Substring(0, i + 1);
     aByte := TEncoding.Utf8.GetBytes(sCanonicalizedData);
 
-    // Вычисление хэша на основе канонизированных данных
+    // Р’С‹С‡РёСЃР»РµРЅРёРµ С…СЌС€Р° РЅР° РѕСЃРЅРѕРІРµ РєР°РЅРѕРЅРёР·РёСЂРѕРІР°РЅРЅС‹С… РґР°РЅРЅС‹С…
 
     CheckCryptoCall(CryptCreateHash(ACryptoProvider, CALG_GR3411, 0, 0, @Result));
     CheckCryptoCall(CryptHashData(Result, PByte(aByte), Length(aByte), 0));
@@ -128,24 +128,24 @@ begin
   end;
 end;
 
-// Вычисление данных по хэшу.
-// Например, для помещения его далее в XML-узел документа.
+// Р’С‹С‡РёСЃР»РµРЅРёРµ РґР°РЅРЅС‹С… РїРѕ С…СЌС€Сѓ.
+// РќР°РїСЂРёРјРµСЂ, РґР»СЏ РїРѕРјРµС‰РµРЅРёСЏ РµРіРѕ РґР°Р»РµРµ РІ XML-СѓР·РµР» РґРѕРєСѓРјРµРЅС‚Р°.
 class function TCrypto.GetHashValue(AHash: HCRYPTHASH): TBytes;
 var
   pbHash: PBYTE;
   hashSize, dwSize: DWORD;
 begin
-  // Вычисление размерности указателя на буфер значения хэша
+  // Р’С‹С‡РёСЃР»РµРЅРёРµ СЂР°Р·РјРµСЂРЅРѕСЃС‚Рё СѓРєР°Р·Р°С‚РµР»СЏ РЅР° Р±СѓС„РµСЂ Р·РЅР°С‡РµРЅРёСЏ С…СЌС€Р°
   dwSize := sizeof(DWORD);
   CheckCryptoCall(CryptGetHashParam(AHash, HP_HASHSIZE, @hashSize, @dwSize, 0));
 
   try
-    // Выделение памяти под указатель на буфер значения хэша
+    // Р’С‹РґРµР»РµРЅРёРµ РїР°РјСЏС‚Рё РїРѕРґ СѓРєР°Р·Р°С‚РµР»СЊ РЅР° Р±СѓС„РµСЂ Р·РЅР°С‡РµРЅРёСЏ С…СЌС€Р°
     GetMem(pbHash, hashSize);
-    // Получение значения хэша и его размера
+    // РџРѕР»СѓС‡РµРЅРёРµ Р·РЅР°С‡РµРЅРёСЏ С…СЌС€Р° Рё РµРіРѕ СЂР°Р·РјРµСЂР°
     CheckCryptoCall(CryptGetHashParam(AHash, HP_HASHVAL, pbHash, @hashSize, 0));
 
-    // Выделение памяти для значения хэша
+    // Р’С‹РґРµР»РµРЅРёРµ РїР°РјСЏС‚Рё РґР»СЏ Р·РЅР°С‡РµРЅРёСЏ С…СЌС€Р°
     SetLength(Result, hashSize);
     Move(pbHash^, Result[0], hashSize);
   finally
@@ -154,28 +154,28 @@ begin
   end;
 end;
 
-// Наложение ЭП на вычисленный заранее хэша данных
+// РќР°Р»РѕР¶РµРЅРёРµ Р­Рџ РЅР° РІС‹С‡РёСЃР»РµРЅРЅС‹Р№ Р·Р°СЂР°РЅРµРµ С…СЌС€Р° РґР°РЅРЅС‹С…
 class function TCrypto.CreateSignature(AHash: HCRYPTHASH): TBytes;
 var
   hashSize: DWORD;
   pbHash: PBYTE;
   aByte: TBytes;
 begin
-  // Вычисление размера ЭП хэша данных
+  // Р’С‹С‡РёСЃР»РµРЅРёРµ СЂР°Р·РјРµСЂР° Р­Рџ С…СЌС€Р° РґР°РЅРЅС‹С…
   hashSize := 0;
   CheckCryptoCall(CryptSignHash(AHash, AT_KEYEXCHANGE, nil, 0, nil, @hashSize));
 
   if hashSize > 0 then
     try
       GetMem(pbHash, hashSize);
-      // Наложение ЭП хэша данных
+      // РќР°Р»РѕР¶РµРЅРёРµ Р­Рџ С…СЌС€Р° РґР°РЅРЅС‹С…
       CheckCryptoCall(CryptSignHash(AHash, AT_KEYEXCHANGE, nil, 0, pbHash, @hashSize));
 
       SetLength(aByte, hashSize);
       Move(pbHash^, aByte[0], hashSize);
 
-      // Реверсирование контента (обратный порядок байт). По неизвестной причине это требуется
-      // для корректной обработки подписи в ФСС. Видимо, связано с работой их криптопровайдера.
+      // Р РµРІРµСЂСЃРёСЂРѕРІР°РЅРёРµ РєРѕРЅС‚РµРЅС‚Р° (РѕР±СЂР°С‚РЅС‹Р№ РїРѕСЂСЏРґРѕРє Р±Р°Р№С‚). РџРѕ РЅРµРёР·РІРµСЃС‚РЅРѕР№ РїСЂРёС‡РёРЅРµ СЌС‚Рѕ С‚СЂРµР±СѓРµС‚СЃСЏ
+      // РґР»СЏ РєРѕСЂСЂРµРєС‚РЅРѕР№ РѕР±СЂР°Р±РѕС‚РєРё РїРѕРґРїРёСЃРё РІ Р¤РЎРЎ. Р’РёРґРёРјРѕ, СЃРІСЏР·Р°РЅРѕ СЃ СЂР°Р±РѕС‚РѕР№ РёС… РєСЂРёРїС‚РѕРїСЂРѕРІР°Р№РґРµСЂР°.
       Result := ReverseArray(aByte);
     finally
       if Assigned(pbHash) then
@@ -185,7 +185,7 @@ begin
     end;
 end;
 
-// Получение сертификата открытого ключа из контейнера криптопровайдера
+// РџРѕР»СѓС‡РµРЅРёРµ СЃРµСЂС‚РёС„РёРєР°С‚Р° РѕС‚РєСЂС‹С‚РѕРіРѕ РєР»СЋС‡Р° РёР· РєРѕРЅС‚РµР№РЅРµСЂР° РєСЂРёРїС‚РѕРїСЂРѕРІР°Р№РґРµСЂР°
 class function TCrypto.GetProviderPublicCertificate(ACryptoProvider: HCRYPTPROV): string;
 var
   hPrivateKey: HCRYPTKEY;
@@ -195,7 +195,7 @@ begin
   Result := '';
 
   try
-    // Получение закрытого ключа криптопровайдера
+    // РџРѕР»СѓС‡РµРЅРёРµ Р·Р°РєСЂС‹С‚РѕРіРѕ РєР»СЋС‡Р° РєСЂРёРїС‚РѕРїСЂРѕРІР°Р№РґРµСЂР°
     CheckCryptoCall(CryptGetUserKey(ACryptoProvider, AT_KEYEXCHANGE, @hPrivateKey));
 
     CheckCryptoCall(CryptGetKeyParam(hPrivateKey, KP_CERTIFICATE, nil, @size, 0));
@@ -211,7 +211,7 @@ begin
   end;
 end;
 
-// Реверсирование контента подписи (обратный порядок байт)
+// Р РµРІРµСЂСЃРёСЂРѕРІР°РЅРёРµ РєРѕРЅС‚РµРЅС‚Р° РїРѕРґРїРёСЃРё (РѕР±СЂР°С‚РЅС‹Р№ РїРѕСЂСЏРґРѕРє Р±Р°Р№С‚)
 class function TCrypto.ReverseArray(ASource: TBytes): TBytes;
 var
   len, i: integer;
@@ -225,7 +225,7 @@ end;
 
 class procedure TCrypto.Initialize;
 begin
-  // c# COM-объектЮ реализация канонизатора
+  // c# COM-РѕР±СЉРµРєС‚Р® СЂРµР°Р»РёР·Р°С†РёСЏ РєР°РЅРѕРЅРёР·Р°С‚РѕСЂР°
   fCanonicalizer := CoXmlCanonicalizer.Create;
 end;
 
@@ -234,8 +234,8 @@ begin
   fCanonicalizer := nil;
 end;
 
-// Получение BLOB-а открытого ключа получателя зашифрованных сообщений
-// - ARemoteCertPath - путь к сертификату открытого ключа получателя зашифрованных сообщений
+// РџРѕР»СѓС‡РµРЅРёРµ BLOB-Р° РѕС‚РєСЂС‹С‚РѕРіРѕ РєР»СЋС‡Р° РїРѕР»СѓС‡Р°С‚РµР»СЏ Р·Р°С€РёС„СЂРѕРІР°РЅРЅС‹С… СЃРѕРѕР±С‰РµРЅРёР№
+// - ARemoteCertPath - РїСѓС‚СЊ Рє СЃРµСЂС‚РёС„РёРєР°С‚Сѓ РѕС‚РєСЂС‹С‚РѕРіРѕ РєР»СЋС‡Р° РїРѕР»СѓС‡Р°С‚РµР»СЏ Р·Р°С€РёС„СЂРѕРІР°РЅРЅС‹С… СЃРѕРѕР±С‰РµРЅРёР№
 class function TCrypto.GetRemotePublicKeyBlob(ACryptoProvider: HCRYPTPROV; ARemoteCertPath: string): TBytes;
 var
   memStream : TMemoryStream;
@@ -249,7 +249,7 @@ begin
 
     certContext := CertCreateCertificateContext(X509_ASN_ENCODING or PKCS_7_ASN_ENCODING, memStream.Memory, memStream.Size);
 
-    // Импорт информации по открытому ключу ФСС
+    // РРјРїРѕСЂС‚ РёРЅС„РѕСЂРјР°С†РёРё РїРѕ РѕС‚РєСЂС‹С‚РѕРјСѓ РєР»СЋС‡Сѓ Р¤РЎРЎ
     CheckCryptoCall(CryptImportPublicKeyInfoEx(
               ACryptoProvider,
               X509_ASN_ENCODING or PKCS_7_ASN_ENCODING,
@@ -273,7 +273,7 @@ begin
   end;
 end;
 
-// Замена содержимого TStream на новое
+// Р—Р°РјРµРЅР° СЃРѕРґРµСЂР¶РёРјРѕРіРѕ TStream РЅР° РЅРѕРІРѕРµ
 class procedure TCrypto.FormatStream(AStream: TStream; AContent: string);
 var
   resXmlDoc: IXMLDocument;
@@ -292,12 +292,12 @@ begin
   end;
 end;
 
-// Формирование структуры EncryptedData зашифрованного SOAP-сообщения
-// - AEncryptedData подписанный изашифрофанный базовый SOAP-запрос
-// - AEncryptedKey - ASN-структура GostR3410-KeyTransport для формирования сессионного ключа дешифровки
-//                    на стороне получателя зашифрованного сообщения
-// - AProviderCertificate - сертификат открытого ключа, на основе которого было зашифровано сообщение,
-//                          (открытый ключ получателя зашифрованного сообщения)
+// Р¤РѕСЂРјРёСЂРѕРІР°РЅРёРµ СЃС‚СЂСѓРєС‚СѓСЂС‹ EncryptedData Р·Р°С€РёС„СЂРѕРІР°РЅРЅРѕРіРѕ SOAP-СЃРѕРѕР±С‰РµРЅРёСЏ
+// - AEncryptedData РїРѕРґРїРёСЃР°РЅРЅС‹Р№ РёР·Р°С€РёС„СЂРѕС„Р°РЅРЅС‹Р№ Р±Р°Р·РѕРІС‹Р№ SOAP-Р·Р°РїСЂРѕСЃ
+// - AEncryptedKey - ASN-СЃС‚СЂСѓРєС‚СѓСЂР° GostR3410-KeyTransport РґР»СЏ С„РѕСЂРјРёСЂРѕРІР°РЅРёСЏ СЃРµСЃСЃРёРѕРЅРЅРѕРіРѕ РєР»СЋС‡Р° РґРµС€РёС„СЂРѕРІРєРё
+//                    РЅР° СЃС‚РѕСЂРѕРЅРµ РїРѕР»СѓС‡Р°С‚РµР»СЏ Р·Р°С€РёС„СЂРѕРІР°РЅРЅРѕРіРѕ СЃРѕРѕР±С‰РµРЅРёСЏ
+// - AProviderCertificate - СЃРµСЂС‚РёС„РёРєР°С‚ РѕС‚РєСЂС‹С‚РѕРіРѕ РєР»СЋС‡Р°, РЅР° РѕСЃРЅРѕРІРµ РєРѕС‚РѕСЂРѕРіРѕ Р±С‹Р»Рѕ Р·Р°С€РёС„СЂРѕРІР°РЅРѕ СЃРѕРѕР±С‰РµРЅРёРµ,
+//                          (РѕС‚РєСЂС‹С‚С‹Р№ РєР»СЋС‡ РїРѕР»СѓС‡Р°С‚РµР»СЏ Р·Р°С€РёС„СЂРѕРІР°РЅРЅРѕРіРѕ СЃРѕРѕР±С‰РµРЅРёСЏ)
 class procedure TCrypto.SetEncryptedContent(
        ASOAPRequest: IXMLDocument;
        AEncryptedData: TBytes;
@@ -341,8 +341,8 @@ begin
   end;
 end;
 
-// Форматирование дешифрованного контента базового SOAP-запроса
-// (устранение последствий паддинга и т.п.)
+// Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРµС€РёС„СЂРѕРІР°РЅРЅРѕРіРѕ РєРѕРЅС‚РµРЅС‚Р° Р±Р°Р·РѕРІРѕРіРѕ SOAP-Р·Р°РїСЂРѕСЃР°
+// (СѓСЃС‚СЂР°РЅРµРЅРёРµ РїРѕСЃР»РµРґСЃС‚РІРёР№ РїР°РґРґРёРЅРіР° Рё С‚.Рї.)
 class function TCrypto.CreateDecryptedContent(ADecryptedData: TBytes): string;
 begin
   Result := TEncoding.Ansi.GetString(ADecryptedData);
@@ -390,7 +390,7 @@ begin
       ] + publicKey;
 
 
-    // сборка SessionKey BLOB из статической части и параметров сессионного ключа
+    // СЃР±РѕСЂРєР° SessionKey BLOB РёР· СЃС‚Р°С‚РёС‡РµСЃРєРѕР№ С‡Р°СЃС‚Рё Рё РїР°СЂР°РјРµС‚СЂРѕРІ СЃРµСЃСЃРёРѕРЅРЅРѕРіРѕ РєР»СЋС‡Р°
     ASessionKeyBlob :=
     [
      $01, // bType = SIMPLEBLOB
@@ -416,8 +416,8 @@ begin
 
 end;
 
-// Получение контента зашифрованного базового SOAP-сообщения из структуры
-// входящего зашифровнного SOAP-сообщения
+// РџРѕР»СѓС‡РµРЅРёРµ РєРѕРЅС‚РµРЅС‚Р° Р·Р°С€РёС„СЂРѕРІР°РЅРЅРѕРіРѕ Р±Р°Р·РѕРІРѕРіРѕ SOAP-СЃРѕРѕР±С‰РµРЅРёСЏ РёР· СЃС‚СЂСѓРєС‚СѓСЂС‹
+// РІС…РѕРґСЏС‰РµРіРѕ Р·Р°С€РёС„СЂРѕРІРЅРЅРѕРіРѕ SOAP-СЃРѕРѕР±С‰РµРЅРёСЏ
 class function TCrypto.GetEncryptedResponseDataBlob(ASOAPResponse: IXMLDocument): TBytes;
 var
   dataNode: IXMLNode;
@@ -431,38 +431,38 @@ begin
   Result := TNetEncoding.Base64.DecodeStringToBytes(dataNode.Text);
 end;
 
-// Подготовка структуры базового SOAP-запроса к подписи и шифрованию
-// ASourceSOAP - базовый SOAP-запрос, результат вызова метода прокси-объекта веб-сервиса
-// AFormattedSOAP - шаблон подписанного SOAP-собщения, имеющий подготовленную структуру:
-// - служебные заголовки ЭП,
-// - необходимые для удаленного получателя атрибуты XML-узлов
-// - и т.п.
+// РџРѕРґРіРѕС‚РѕРІРєР° СЃС‚СЂСѓРєС‚СѓСЂС‹ Р±Р°Р·РѕРІРѕРіРѕ SOAP-Р·Р°РїСЂРѕСЃР° Рє РїРѕРґРїРёСЃРё Рё С€РёС„СЂРѕРІР°РЅРёСЋ
+// ASourceSOAP - Р±Р°Р·РѕРІС‹Р№ SOAP-Р·Р°РїСЂРѕСЃ, СЂРµР·СѓР»СЊС‚Р°С‚ РІС‹Р·РѕРІР° РјРµС‚РѕРґР° РїСЂРѕРєСЃРё-РѕР±СЉРµРєС‚Р° РІРµР±-СЃРµСЂРІРёСЃР°
+// AFormattedSOAP - С€Р°Р±Р»РѕРЅ РїРѕРґРїРёСЃР°РЅРЅРѕРіРѕ SOAP-СЃРѕР±С‰РµРЅРёСЏ, РёРјРµСЋС‰РёР№ РїРѕРґРіРѕС‚РѕРІР»РµРЅРЅСѓСЋ СЃС‚СЂСѓРєС‚СѓСЂСѓ:
+// - СЃР»СѓР¶РµР±РЅС‹Рµ Р·Р°РіРѕР»РѕРІРєРё Р­Рџ,
+// - РЅРµРѕР±С…РѕРґРёРјС‹Рµ РґР»СЏ СѓРґР°Р»РµРЅРЅРѕРіРѕ РїРѕР»СѓС‡Р°С‚РµР»СЏ Р°С‚СЂРёР±СѓС‚С‹ XML-СѓР·Р»РѕРІ
+// - Рё С‚.Рї.
 class procedure TCrypto.PrepareSOAPRequest(ASourceSOAP: IXMLDocument; AFormattedSOAP: IXMLDocument);
 var
   bodyNode, fssOperationNode, ogrnNode: IXMLNode;
   i: integer;
 begin
-  // Выделение из базового SOAP-запроса узла бизнес-операции (например, получение номера ЭЛН)
+  // Р’С‹РґРµР»РµРЅРёРµ РёР· Р±Р°Р·РѕРІРѕРіРѕ SOAP-Р·Р°РїСЂРѕСЃР° СѓР·Р»Р° Р±РёР·РЅРµСЃ-РѕРїРµСЂР°С†РёРё (РЅР°РїСЂРёРјРµСЂ, РїРѕР»СѓС‡РµРЅРёРµ РЅРѕРјРµСЂР° Р­Р›Рќ)
   fssOperationNode := ASourceSOAP.DocumentElement
                              .ChildNodes[0]  // Body
-                             .ChildNodes[0]; // Operation (например, getNewLNNumRange)
+                             .ChildNodes[0]; // Operation (РЅР°РїСЂРёРјРµСЂ, getNewLNNumRange)
 
-  // Выделение из шаблона подписанного SOAP-сообщения тела SOAP-запроса
+  // Р’С‹РґРµР»РµРЅРёРµ РёР· С€Р°Р±Р»РѕРЅР° РїРѕРґРїРёСЃР°РЅРЅРѕРіРѕ SOAP-СЃРѕРѕР±С‰РµРЅРёСЏ С‚РµР»Р° SOAP-Р·Р°РїСЂРѕСЃР°
   bodyNode := AFormattedSOAP.DocumentElement.ChildNodes[1];
 
-  // Формирование узла бизнес-опреации для шаблона подписанного SOAP-сообщения
+  // Р¤РѕСЂРјРёСЂРѕРІР°РЅРёРµ СѓР·Р»Р° Р±РёР·РЅРµСЃ-РѕРїСЂРµР°С†РёРё РґР»СЏ С€Р°Р±Р»РѕРЅР° РїРѕРґРїРёСЃР°РЅРЅРѕРіРѕ SOAP-СЃРѕРѕР±С‰РµРЅРёСЏ
   bodyNode.ChildNodes.Add(fssOperationNode);
 
-  // Получаем ОГРН организации
+  // РџРѕР»СѓС‡Р°РµРј РћР“Р Рќ РѕСЂРіР°РЅРёР·Р°С†РёРё
   for i := 0 to fssOperationNode.ChildNodes.Count - 1 do
    if AnsiLowerCase(fssOperationNode.ChildNodes[i].LocalName) = 'ogrn' then
      ogrnNode := fssOperationNode.ChildNodes[i];
 
-  // Устанавливаем необходимый ОГРН по всему SOAP-сообщению
+  // РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј РЅРµРѕР±С…РѕРґРёРјС‹Р№ РћР“Р Рќ РїРѕ РІСЃРµРјСѓ SOAP-СЃРѕРѕР±С‰РµРЅРёСЋ
   AFormattedSOAP.LoadFromXML(AFormattedSOAP.DocumentElement.XML.Replace('OGRNNUMBER', ogrnNode.Text));
 end;
 
-// Подпись SOAP-запроса
+// РџРѕРґРїРёСЃСЊ SOAP-Р·Р°РїСЂРѕСЃР°
 class procedure TCrypto.SignSOAPRequest(ACryptoProvider: HCRYPTPROV; ASOAPRequest: IXMLDocument);
 var
   headerNode, bodyNode, securityNode,
@@ -471,7 +471,7 @@ var
   hash: HCRYPTHASH;
   hashValue: TBytes;
 begin
-  // Выделение необходмых XML-узлов
+  // Р’С‹РґРµР»РµРЅРёРµ РЅРµРѕР±С…РѕРґРјС‹С… XML-СѓР·Р»РѕРІ
   headerNode := ASOAPRequest.DocumentElement.ChildNodes[0];
   bodyNode := ASOAPRequest.DocumentElement.ChildNodes[1];
   securityNode := headerNode.ChildNodes[0];
@@ -482,13 +482,13 @@ begin
   referenceNode := signInfoNode.ChildNodes[2];
   digestValueNode :=  referenceNode.ChildNodes[2];
 
-  // Формирование дайджеста тела SOAP-запроса (например, getNewLNNumRange)
+  // Р¤РѕСЂРјРёСЂРѕРІР°РЅРёРµ РґР°Р№РґР¶РµСЃС‚Р° С‚РµР»Р° SOAP-Р·Р°РїСЂРѕСЃР° (РЅР°РїСЂРёРјРµСЂ, getNewLNNumRange)
   try
-    // Вычисление дайджеста
+    // Р’С‹С‡РёСЃР»РµРЅРёРµ РґР°Р№РґР¶РµСЃС‚Р°
     hash := CreateHash(ACryptoProvider, bodyNode.XML);
     hashValue := GetHashValue(hash);
 
-    // Установка BASE64 значения дайджеста в узел digestValue
+    // РЈСЃС‚Р°РЅРѕРІРєР° BASE64 Р·РЅР°С‡РµРЅРёСЏ РґР°Р№РґР¶РµСЃС‚Р° РІ СѓР·РµР» digestValue
     digestValueNode.Text := TNetEncoding.Base64.EncodeBytesToString(hashValue);
   finally
     if hash <> 0 then
@@ -498,13 +498,13 @@ begin
     end;
   end;
 
-  // Наложение ЭП на вычисленный дайджест тела SOAP-запроса.
+  // РќР°Р»РѕР¶РµРЅРёРµ Р­Рџ РЅР° РІС‹С‡РёСЃР»РµРЅРЅС‹Р№ РґР°Р№РґР¶РµСЃС‚ С‚РµР»Р° SOAP-Р·Р°РїСЂРѕСЃР°.
   try
-    // Вычисление ЭП
+    // Р’С‹С‡РёСЃР»РµРЅРёРµ Р­Рџ
     hash := CreateHash(ACryptoProvider, signInfoNode.Xml);
     hashValue := CreateSignature(hash);
 
-    // Установка BASE64 значения ЭП в узел signValue
+    // РЈСЃС‚Р°РЅРѕРІРєР° BASE64 Р·РЅР°С‡РµРЅРёСЏ Р­Рџ РІ СѓР·РµР» signValue
     signValueNode.Text := TNetEncoding.Base64.EncodeBytesToString(hashValue);
   finally
     if hash <> 0 then
@@ -514,7 +514,7 @@ begin
     end;
   end;
 
-  // Указание сертификата открытого ключа, на основе которого формировалась ЭП.
+  // РЈРєР°Р·Р°РЅРёРµ СЃРµСЂС‚РёС„РёРєР°С‚Р° РѕС‚РєСЂС‹С‚РѕРіРѕ РєР»СЋС‡Р°, РЅР° РѕСЃРЅРѕРІРµ РєРѕС‚РѕСЂРѕРіРѕ С„РѕСЂРјРёСЂРѕРІР°Р»Р°СЃСЊ Р­Рџ.
   certificateNode.Text := GetProviderPublicCertificate(ACryptoProvider);
 end;
 
@@ -524,7 +524,7 @@ var
 begin
   Result := False;
 
-  // Выделение необходимых XML-узлов
+  // Р’С‹РґРµР»РµРЅРёРµ РЅРµРѕР±С…РѕРґРёРјС‹С… XML-СѓР·Р»РѕРІ
   if ASOAPResponse.DocumentElement.ChildNodes.Count = 1 then
   begin
     node := ASOAPResponse.DocumentElement.ChildNodes[0];
@@ -535,7 +535,7 @@ begin
   end;
 end;
 
-// Шифрование SOAP-запроса
+// РЁРёС„СЂРѕРІР°РЅРёРµ SOAP-Р·Р°РїСЂРѕСЃР°
 class procedure TCrypto.EncryptSOAPRequest(ACryptoProvider: HCRYPTPROV; ARemoteCertPath: string; ASOAPRequest: IXMLDocument);
 var
   hEphemeralKey, hAgreeKey, hSessionKey: HCRYPTKEY;
@@ -550,53 +550,53 @@ var
   encryptedData: TBytes;
 begin
   try
-    // Формирование эфемерного ключа в качестве локального закрытого ключа
-    // отправителя зашифрованного сообщения.
-    // В принципе, работать будет и на обычном локальном закрытом ключе (CryptGetUserKey).
+    // Р¤РѕСЂРјРёСЂРѕРІР°РЅРёРµ СЌС„РµРјРµСЂРЅРѕРіРѕ РєР»СЋС‡Р° РІ РєР°С‡РµСЃС‚РІРµ Р»РѕРєР°Р»СЊРЅРѕРіРѕ Р·Р°РєСЂС‹С‚РѕРіРѕ РєР»СЋС‡Р°
+    // РѕС‚РїСЂР°РІРёС‚РµР»СЏ Р·Р°С€РёС„СЂРѕРІР°РЅРЅРѕРіРѕ СЃРѕРѕР±С‰РµРЅРёСЏ.
+    // Р’ РїСЂРёРЅС†РёРїРµ, СЂР°Р±РѕС‚Р°С‚СЊ Р±СѓРґРµС‚ Рё РЅР° РѕР±С‹С‡РЅРѕРј Р»РѕРєР°Р»СЊРЅРѕРј Р·Р°РєСЂС‹С‚РѕРј РєР»СЋС‡Рµ (CryptGetUserKey).
     CheckCryptoCall(CryptGenKey(ACryptoProvider, CALG_DH_EL_EPHEM, CRYPT_EXPORTABLE, @hEphemeralKey));
 
-    // Экспорт открытого ключа в BLOB из локального закрытого.
+    // Р­РєСЃРїРѕСЂС‚ РѕС‚РєСЂС‹С‚РѕРіРѕ РєР»СЋС‡Р° РІ BLOB РёР· Р»РѕРєР°Р»СЊРЅРѕРіРѕ Р·Р°РєСЂС‹С‚РѕРіРѕ.
     CheckCryptoCall(CryptExportKey(hEphemeralKey, 0, PUBLICKEYBLOB, 0, nil, @size));
     SetLength(providerPublicKeyBlob, size);
     CheckCryptoCall(CryptExportKey(hEphemeralKey, 0, PUBLICKEYBLOB, 0, @providerPublicKeyBlob[0], @size));
 
-    // Выделение из BLOB-а контента открытого ключа (структуру BLOB-а см. в GetResponseKeysBlobs),
-    // который далее пойдет в GostR3410-KeyTransport
+    // Р’С‹РґРµР»РµРЅРёРµ РёР· BLOB-Р° РєРѕРЅС‚РµРЅС‚Р° РѕС‚РєСЂС‹С‚РѕРіРѕ РєР»СЋС‡Р° (СЃС‚СЂСѓРєС‚СѓСЂСѓ BLOB-Р° СЃРј. РІ GetResponseKeysBlobs),
+    // РєРѕС‚РѕСЂС‹Р№ РґР°Р»РµРµ РїРѕР№РґРµС‚ РІ GostR3410-KeyTransport
     publicKey := Copy(providerPublicKeyBlob, Length(providerPublicKeyBlob) - 64, 64);
 
-    // Получение BLOB открытого ключа удаленного получателя зашифрованного сообщения (ФСС).
-    // ARemoteCertPath - путь к сертификату открытого ключа удаленного получателя зашифрованного сообщения,
-    // который, часто, публикуется в открытом доступе, на сайте получателя.
+    // РџРѕР»СѓС‡РµРЅРёРµ BLOB РѕС‚РєСЂС‹С‚РѕРіРѕ РєР»СЋС‡Р° СѓРґР°Р»РµРЅРЅРѕРіРѕ РїРѕР»СѓС‡Р°С‚РµР»СЏ Р·Р°С€РёС„СЂРѕРІР°РЅРЅРѕРіРѕ СЃРѕРѕР±С‰РµРЅРёСЏ (Р¤РЎРЎ).
+    // ARemoteCertPath - РїСѓС‚СЊ Рє СЃРµСЂС‚РёС„РёРєР°С‚Сѓ РѕС‚РєСЂС‹С‚РѕРіРѕ РєР»СЋС‡Р° СѓРґР°Р»РµРЅРЅРѕРіРѕ РїРѕР»СѓС‡Р°С‚РµР»СЏ Р·Р°С€РёС„СЂРѕРІР°РЅРЅРѕРіРѕ СЃРѕРѕР±С‰РµРЅРёСЏ,
+    // РєРѕС‚РѕСЂС‹Р№, С‡Р°СЃС‚Рѕ, РїСѓР±Р»РёРєСѓРµС‚СЃСЏ РІ РѕС‚РєСЂС‹С‚РѕРј РґРѕСЃС‚СѓРїРµ, РЅР° СЃР°Р№С‚Рµ РїРѕР»СѓС‡Р°С‚РµР»СЏ.
     remotePublicKeyBlob := GetRemotePublicKeyBlob(ACryptoProvider, ARemoteCertPath);
 
-    // Получение ключа согласования импортом открытого ключа получателя зашифрованного сообщения (ФСС)
-    // на локальном закрытом ключе отправителя зашифрованного сообщения.
+    // РџРѕР»СѓС‡РµРЅРёРµ РєР»СЋС‡Р° СЃРѕРіР»Р°СЃРѕРІР°РЅРёСЏ РёРјРїРѕСЂС‚РѕРј РѕС‚РєСЂС‹С‚РѕРіРѕ РєР»СЋС‡Р° РїРѕР»СѓС‡Р°С‚РµР»СЏ Р·Р°С€РёС„СЂРѕРІР°РЅРЅРѕРіРѕ СЃРѕРѕР±С‰РµРЅРёСЏ (Р¤РЎРЎ)
+    // РЅР° Р»РѕРєР°Р»СЊРЅРѕРј Р·Р°РєСЂС‹С‚РѕРј РєР»СЋС‡Рµ РѕС‚РїСЂР°РІРёС‚РµР»СЏ Р·Р°С€РёС„СЂРѕРІР°РЅРЅРѕРіРѕ СЃРѕРѕР±С‰РµРЅРёСЏ.
     CheckCryptoCall(CryptImportKey(ACryptoProvider, @remotePublicKeyBlob[0], Length(remotePublicKeyBlob),
                                        hEphemeralKey, 0, @hAgreeKey));
 
-    // Установка PRO_EXPORT алгоритма ключа согласования
+    // РЈСЃС‚Р°РЅРѕРІРєР° PRO_EXPORT Р°Р»РіРѕСЂРёС‚РјР° РєР»СЋС‡Р° СЃРѕРіР»Р°СЃРѕРІР°РЅРёСЏ
     keyParam := CALG_PRO_EXPORT;
     CheckCryptoCall(CryptSetKeyParam(hAgreeKey, KP_ALGID, @keyParam, 0));
 
-    // Создание случайного сессионного ключа, которым будет зашифровано сообщение.
+    // РЎРѕР·РґР°РЅРёРµ СЃР»СѓС‡Р°Р№РЅРѕРіРѕ СЃРµСЃСЃРёРѕРЅРЅРѕРіРѕ РєР»СЋС‡Р°, РєРѕС‚РѕСЂС‹Рј Р±СѓРґРµС‚ Р·Р°С€РёС„СЂРѕРІР°РЅРѕ СЃРѕРѕР±С‰РµРЅРёРµ.
     CheckCryptoCall(CryptGenKey(ACryptoProvider, CALG_G28147, CRYPT_EXPORTABLE, @hSessionKey));
 
-    // Экспорт сессионного ключа в BLOB
+    // Р­РєСЃРїРѕСЂС‚ СЃРµСЃСЃРёРѕРЅРЅРѕРіРѕ РєР»СЋС‡Р° РІ BLOB
     CheckCryptoCall(CryptExportKey(hSessionKey, hAgreeKey, SIMPLEBLOB, 0, nil, @size));
     SetLength(sessionKeyBlob, size);
     CheckCryptoCall(CryptExportKey(hSessionKey, hAgreeKey, SIMPLEBLOB, 0, @sessionKeyBlob[0], @size));
 
-    // Выделение из BLOB-а контенты компонент UKM, сессионного ключа, MAC. Структуру BLOB-а см. в GetResponseKeysBlobs.
+    // Р’С‹РґРµР»РµРЅРёРµ РёР· BLOB-Р° РєРѕРЅС‚РµРЅС‚С‹ РєРѕРјРїРѕРЅРµРЅС‚ UKM, СЃРµСЃСЃРёРѕРЅРЅРѕРіРѕ РєР»СЋС‡Р°, MAC. РЎС‚СЂСѓРєС‚СѓСЂСѓ BLOB-Р° СЃРј. РІ GetResponseKeysBlobs.
     sessionSV  := Copy(sessionKeyBlob, 16, 8);
     sessionKey := Copy(sessionKeyBlob, 24, 32);
     sessionMAC := Copy(sessionKeyBlob, 56, 4);
 
-    // Формирование структуры GostR3410-KeyTransport, которая передается получателю зашифрованного сообщения
-    // в служебном заголовке этого сообщения. Далее получатель на основе этой структуры формирует сессионный ключ,
-    // которым дешифрует зашифрованное сообщение отправителя.
-    // transportBlob при необходимости можно сохранить в бинарный файл и открыть его редактором ASN1, например,
-    // https://lapo.it/asn1js/  - онлайн
-    // https://www.codeproject.com/Articles/4910/ASN-Editor - десктоп
+    // Р¤РѕСЂРјРёСЂРѕРІР°РЅРёРµ СЃС‚СЂСѓРєС‚СѓСЂС‹ GostR3410-KeyTransport, РєРѕС‚РѕСЂР°СЏ РїРµСЂРµРґР°РµС‚СЃСЏ РїРѕР»СѓС‡Р°С‚РµР»СЋ Р·Р°С€РёС„СЂРѕРІР°РЅРЅРѕРіРѕ СЃРѕРѕР±С‰РµРЅРёСЏ
+    // РІ СЃР»СѓР¶РµР±РЅРѕРј Р·Р°РіРѕР»РѕРІРєРµ СЌС‚РѕРіРѕ СЃРѕРѕР±С‰РµРЅРёСЏ. Р”Р°Р»РµРµ РїРѕР»СѓС‡Р°С‚РµР»СЊ РЅР° РѕСЃРЅРѕРІРµ СЌС‚РѕР№ СЃС‚СЂСѓРєС‚СѓСЂС‹ С„РѕСЂРјРёСЂСѓРµС‚ СЃРµСЃСЃРёРѕРЅРЅС‹Р№ РєР»СЋС‡,
+    // РєРѕС‚РѕСЂС‹Рј РґРµС€РёС„СЂСѓРµС‚ Р·Р°С€РёС„СЂРѕРІР°РЅРЅРѕРµ СЃРѕРѕР±С‰РµРЅРёРµ РѕС‚РїСЂР°РІРёС‚РµР»СЏ.
+    // transportBlob РїСЂРё РЅРµРѕР±С…РѕРґРёРјРѕСЃС‚Рё РјРѕР¶РЅРѕ СЃРѕС…СЂР°РЅРёС‚СЊ РІ Р±РёРЅР°СЂРЅС‹Р№ С„Р°Р№Р» Рё РѕС‚РєСЂС‹С‚СЊ РµРіРѕ СЂРµРґР°РєС‚РѕСЂРѕРј ASN1, РЅР°РїСЂРёРјРµСЂ,
+    // https://lapo.it/asn1js/  - РѕРЅР»Р°Р№РЅ
+    // https://www.codeproject.com/Articles/4910/ASN-Editor - РґРµСЃРєС‚РѕРї
     transportBlob :=
        [$30, $81, $A4, $30, $28, $04, $20] +
        sessionKey +
@@ -610,36 +610,36 @@ begin
        [$04, $08] +
        sessionSV;
 
-    // Получение из сессионного ключа параметра вектора инициализации. Далее он прикрепляется
-    // к зашифрованному сообщению (см. ниже)
+    // РџРѕР»СѓС‡РµРЅРёРµ РёР· СЃРµСЃСЃРёРѕРЅРЅРѕРіРѕ РєР»СЋС‡Р° РїР°СЂР°РјРµС‚СЂР° РІРµРєС‚РѕСЂР° РёРЅРёС†РёР°Р»РёР·Р°С†РёРё. Р”Р°Р»РµРµ РѕРЅ РїСЂРёРєСЂРµРїР»СЏРµС‚СЃСЏ
+    // Рє Р·Р°С€РёС„СЂРѕРІР°РЅРЅРѕРјСѓ СЃРѕРѕР±С‰РµРЅРёСЋ (СЃРј. РЅРёР¶Рµ)
     CheckCryptoCall(CryptGetKeyParam(hSessionKey, KP_IV, nil, @size, 0));
     SetLength(initVector, size);
     CheckCryptoCall(CryptGetKeyParam(hSessionKey, KP_IV, @initVector[0], @size, 0));
 
-    // Установка режима шифрования CBC
+    // РЈСЃС‚Р°РЅРѕРІРєР° СЂРµР¶РёРјР° С€РёС„СЂРѕРІР°РЅРёСЏ CBC
     keyParam := CRYPT_MODE_CBC;
     CheckCryptoCall(CryptSetKeyParam(hSessionKey, KP_MODE, @keyParam, 0));
 
-    // При необходимости, необходимо установить режим паддинга (выравнивания) следующим образом
+    // РџСЂРё РЅРµРѕР±С…РѕРґРёРјРѕСЃС‚Рё, РЅРµРѕР±С…РѕРґРёРјРѕ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ СЂРµР¶РёРј РїР°РґРґРёРЅРіР° (РІС‹СЂР°РІРЅРёРІР°РЅРёСЏ) СЃР»РµРґСѓСЋС‰РёРј РѕР±СЂР°Р·РѕРј
     //
     //keyParam := 0;
     //CheckCryptoCall(CryptSetKeyParam(hSessionKey, KP_PADDING, @keyParam, 0));
     //
-    // В некоторых случаях выравнивание реализуется вручную, путем добавления
+    // Р’ РЅРµРєРѕС‚РѕСЂС‹С… СЃР»СѓС‡Р°СЏС… РІС‹СЂР°РІРЅРёРІР°РЅРёРµ СЂРµР°Р»РёР·СѓРµС‚СЃСЏ РІСЂСѓС‡РЅСѓСЋ, РїСѓС‚РµРј РґРѕР±Р°РІР»РµРЅРёСЏ
 
-    // Получение контента базового SOAP-запроса, который будет зашифрован перед отправкой получателю.
+    // РџРѕР»СѓС‡РµРЅРёРµ РєРѕРЅС‚РµРЅС‚Р° Р±Р°Р·РѕРІРѕРіРѕ SOAP-Р·Р°РїСЂРѕСЃР°, РєРѕС‚РѕСЂС‹Р№ Р±СѓРґРµС‚ Р·Р°С€РёС„СЂРѕРІР°РЅ РїРµСЂРµРґ РѕС‚РїСЂР°РІРєРѕР№ РїРѕР»СѓС‡Р°С‚РµР»СЋ.
     encryptedData := TEncoding.Default.GetBytes(ASOAPRequest.DocumentElement.XML);
 
-    // Определение размера незашифрованного SOAP-запроса.
+    // РћРїСЂРµРґРµР»РµРЅРёРµ СЂР°Р·РјРµСЂР° РЅРµР·Р°С€РёС„СЂРѕРІР°РЅРЅРѕРіРѕ SOAP-Р·Р°РїСЂРѕСЃР°.
     sourceDataLen := Length(encryptedData);
     encryptDataLen := sourceDataLen;
 
-    // Шифрование базового SOAP-запроса
+    // РЁРёС„СЂРѕРІР°РЅРёРµ Р±Р°Р·РѕРІРѕРіРѕ SOAP-Р·Р°РїСЂРѕСЃР°
     CryptEncrypt(hSessionKey, 0, true, 0, nil, @encryptDataLen, 0);
     SetLength(encryptedData, encryptDataLen);
     CryptEncrypt(hSessionKey, 0, true, 0, @encryptedData[0], @sourceDataLen, encryptDataLen);
 
-    // Формирование структуры зашифрованного SOAP-запроса.
+    // Р¤РѕСЂРјРёСЂРѕРІР°РЅРёРµ СЃС‚СЂСѓРєС‚СѓСЂС‹ Р·Р°С€РёС„СЂРѕРІР°РЅРЅРѕРіРѕ SOAP-Р·Р°РїСЂРѕСЃР°.
     SetEncryptedContent(ASOAPRequest, initVector + encryptedData,
                           transportBlob, GetProviderPublicCertificate(ACryptoProvider));
   finally
@@ -663,7 +663,7 @@ begin
   end;
 end;
 
-// Дешифрование SOAP-ответа
+// Р”РµС€РёС„СЂРѕРІР°РЅРёРµ SOAP-РѕС‚РІРµС‚Р°
 class function TCrypto.DecryptSOAPResponse(ACryptoProvider: HCRYPTPROV; ASOAPResponse: IXMLDocument): string;
 var
   remotePublicKeyBlob, remoteSessionKeyBlob,
@@ -675,55 +675,55 @@ var
   keyParam: DWORD;
 begin
   try
-    // Получение локального закрытого ключа
+    // РџРѕР»СѓС‡РµРЅРёРµ Р»РѕРєР°Р»СЊРЅРѕРіРѕ Р·Р°РєСЂС‹С‚РѕРіРѕ РєР»СЋС‡Р°
     CheckCryptoCall(CryptGetUserKey(ACryptoProvider, AT_KEYEXCHANGE, @hPrivateKey));
 
-    // Формирование BLOB-ов публичного и сессионного ключей ФСС на основе зашифрованного ключа из ответа ФСС
+    // Р¤РѕСЂРјРёСЂРѕРІР°РЅРёРµ BLOB-РѕРІ РїСѓР±Р»РёС‡РЅРѕРіРѕ Рё СЃРµСЃСЃРёРѕРЅРЅРѕРіРѕ РєР»СЋС‡РµР№ Р¤РЎРЎ РЅР° РѕСЃРЅРѕРІРµ Р·Р°С€РёС„СЂРѕРІР°РЅРЅРѕРіРѕ РєР»СЋС‡Р° РёР· РѕС‚РІРµС‚Р° Р¤РЎРЎ
     GetResponseKeysBlobs(ASOAPResponse, remotePublicKeyBlob, remoteSessionKeyBlob);
 
-    // Получение ключа согласования импортом открытого ключа ФСС (отправителя)
-    // на локальном закрытом ключе (получателя)
+    // РџРѕР»СѓС‡РµРЅРёРµ РєР»СЋС‡Р° СЃРѕРіР»Р°СЃРѕРІР°РЅРёСЏ РёРјРїРѕСЂС‚РѕРј РѕС‚РєСЂС‹С‚РѕРіРѕ РєР»СЋС‡Р° Р¤РЎРЎ (РѕС‚РїСЂР°РІРёС‚РµР»СЏ)
+    // РЅР° Р»РѕРєР°Р»СЊРЅРѕРј Р·Р°РєСЂС‹С‚РѕРј РєР»СЋС‡Рµ (РїРѕР»СѓС‡Р°С‚РµР»СЏ)
     CheckCryptoCall(CryptImportKey(ACryptoProvider, @remotePublicKeyBlob[0], Length(remotePublicKeyBlob), hPrivateKey, 0, @hAgreeKey));
 
-    // Установка параметра PRO_EXPORT алгоритма ключа согласования
+    // РЈСЃС‚Р°РЅРѕРІРєР° РїР°СЂР°РјРµС‚СЂР° PRO_EXPORT Р°Р»РіРѕСЂРёС‚РјР° РєР»СЋС‡Р° СЃРѕРіР»Р°СЃРѕРІР°РЅРёСЏ
     keyParam := CALG_PRO_EXPORT;
     CheckCryptoCall(CryptSetKeyParam(hAgreeKey, KP_ALGID, @keyParam, 0));
 
-    // Получение сессионного ключа импортом сессионного ключа ФСС (отправителя)
-    // на ключе согласования
+    // РџРѕР»СѓС‡РµРЅРёРµ СЃРµСЃСЃРёРѕРЅРЅРѕРіРѕ РєР»СЋС‡Р° РёРјРїРѕСЂС‚РѕРј СЃРµСЃСЃРёРѕРЅРЅРѕРіРѕ РєР»СЋС‡Р° Р¤РЎРЎ (РѕС‚РїСЂР°РІРёС‚РµР»СЏ)
+    // РЅР° РєР»СЋС‡Рµ СЃРѕРіР»Р°СЃРѕРІР°РЅРёСЏ
     CheckCryptoCall(CryptImportKey(ACryptoProvider, @remoteSessionKeyBlob[0], Length(remoteSessionKeyBlob), hAgreeKey, 0, @hSessionKey));
 
-    // Установка режима шифрования CBC
+    // РЈСЃС‚Р°РЅРѕРІРєР° СЂРµР¶РёРјР° С€РёС„СЂРѕРІР°РЅРёСЏ CBC
     keyParam := CRYPT_MODE_CBC;
     CheckCryptoCall(CryptSetKeyParam(hSessionKey, KP_MODE, @keyParam, 0));
 
-    // Установка режима паддинга
+    // РЈСЃС‚Р°РЅРѕРІРєР° СЂРµР¶РёРјР° РїР°РґРґРёРЅРіР°
     keyParam := 0;
     CheckCryptoCall(CryptSetKeyParam(hSessionKey, KP_PADDING, @keyParam, 0));
 
-    // Получение зашифрованных данных из ответа ФСС
+    // РџРѕР»СѓС‡РµРЅРёРµ Р·Р°С€РёС„СЂРѕРІР°РЅРЅС‹С… РґР°РЅРЅС‹С… РёР· РѕС‚РІРµС‚Р° Р¤РЎРЎ
     responseData := GetEncryptedResponseDataBlob(ASOAPResponse);
 
-    // Получение вектора инициализации (первые 8 байт ответа)
+    // РџРѕР»СѓС‡РµРЅРёРµ РІРµРєС‚РѕСЂР° РёРЅРёС†РёР°Р»РёР·Р°С†РёРё (РїРµСЂРІС‹Рµ 8 Р±Р°Р№С‚ РѕС‚РІРµС‚Р°)
     initVector := Copy(responseData, 0, 8);
-    // Полученние зашифрованного базового SOAP-запроса
+    // РџРѕР»СѓС‡РµРЅРЅРёРµ Р·Р°С€РёС„СЂРѕРІР°РЅРЅРѕРіРѕ Р±Р°Р·РѕРІРѕРіРѕ SOAP-Р·Р°РїСЂРѕСЃР°
     decryptedData := Copy(responseData, 8, Length(responseData) - 8);
 
-    // Установка вектора инициализации
+    // РЈСЃС‚Р°РЅРѕРІРєР° РІРµРєС‚РѕСЂР° РёРЅРёС†РёР°Р»РёР·Р°С†РёРё
     CheckCryptoCall(CryptSetKeyParam(hSessionKey, KP_IV, @initVector[0], 0));
 
-    // Определение размера буфера зашифрованного базового SOAP-запроса
+    // РћРїСЂРµРґРµР»РµРЅРёРµ СЂР°Р·РјРµСЂР° Р±СѓС„РµСЂР° Р·Р°С€РёС„СЂРѕРІР°РЅРЅРѕРіРѕ Р±Р°Р·РѕРІРѕРіРѕ SOAP-Р·Р°РїСЂРѕСЃР°
     decryptedDataLen := Length(decryptedData);
 
-    // Дешифрование зашифрованного базового SOAP-запроса, после которого в
-    // decryptedData будет содержать дешифрованные данные,
-    // а decryptedDataLen - длину расшифрованных данных
+    // Р”РµС€РёС„СЂРѕРІР°РЅРёРµ Р·Р°С€РёС„СЂРѕРІР°РЅРЅРѕРіРѕ Р±Р°Р·РѕРІРѕРіРѕ SOAP-Р·Р°РїСЂРѕСЃР°, РїРѕСЃР»Рµ РєРѕС‚РѕСЂРѕРіРѕ РІ
+    // decryptedData Р±СѓРґРµС‚ СЃРѕРґРµСЂР¶Р°С‚СЊ РґРµС€РёС„СЂРѕРІР°РЅРЅС‹Рµ РґР°РЅРЅС‹Рµ,
+    // Р° decryptedDataLen - РґР»РёРЅСѓ СЂР°СЃС€РёС„СЂРѕРІР°РЅРЅС‹С… РґР°РЅРЅС‹С…
     CheckCryptoCall(CryptDecrypt(hSessionKey, 0, true, 0, @decryptedData[0], @decryptedDataLen));
 
-    // Обновление размера буфера дешифрованного базового SOAP-запроса
+    // РћР±РЅРѕРІР»РµРЅРёРµ СЂР°Р·РјРµСЂР° Р±СѓС„РµСЂР° РґРµС€РёС„СЂРѕРІР°РЅРЅРѕРіРѕ Р±Р°Р·РѕРІРѕРіРѕ SOAP-Р·Р°РїСЂРѕСЃР°
     SetLength(decryptedData, decryptedDataLen);
 
-    // Формирование конечного содержания базового SOAP-запроса (устранение последствий паддинга и т.п.)
+    // Р¤РѕСЂРјРёСЂРѕРІР°РЅРёРµ РєРѕРЅРµС‡РЅРѕРіРѕ СЃРѕРґРµСЂР¶Р°РЅРёСЏ Р±Р°Р·РѕРІРѕРіРѕ SOAP-Р·Р°РїСЂРѕСЃР° (СѓСЃС‚СЂР°РЅРµРЅРёРµ РїРѕСЃР»РµРґСЃС‚РІРёР№ РїР°РґРґРёРЅРіР° Рё С‚.Рї.)
     Result := CreateDecryptedContent(decryptedData);
   finally
     if hSessionKey <> 0 then
@@ -742,7 +742,7 @@ begin
   end;
 end;
 
-// Перехватчик вызова метода веб-сервиса ФСС с шифрованием SOAP-контента
+// РџРµСЂРµС…РІР°С‚С‡РёРє РІС‹Р·РѕРІР° РјРµС‚РѕРґР° РІРµР±-СЃРµСЂРІРёСЃР° Р¤РЎРЎ СЃ С€РёС„СЂРѕРІР°РЅРёРµРј SOAP-РєРѕРЅС‚РµРЅС‚Р°
 class procedure TCrypto.FssOnBeforeExecute(const MethodName: string; SOAPRequest: TStream);
 var
   hCryptoProvider: HCRYPTPROV;
@@ -769,7 +769,7 @@ begin
   end;
 end;
 
-// Перехватчик синхронного ответа ФСС на вызов метода веб-сервиса ФСС с дешифрованием SOAP-контента
+// РџРµСЂРµС…РІР°С‚С‡РёРє СЃРёРЅС…СЂРѕРЅРЅРѕРіРѕ РѕС‚РІРµС‚Р° Р¤РЎРЎ РЅР° РІС‹Р·РѕРІ РјРµС‚РѕРґР° РІРµР±-СЃРµСЂРІРёСЃР° Р¤РЎРЎ СЃ РґРµС€РёС„СЂРѕРІР°РЅРёРµРј SOAP-РєРѕРЅС‚РµРЅС‚Р°
 class procedure TCrypto.FssOnAfterExecute(const MethodName: string; SOAPResponse: TStream);
 var
   hCryptoProvider: HCRYPTPROV;
@@ -782,7 +782,7 @@ begin
 
     InitContext(@hCryptoProvider, PROV_GOST_2001_DH, 'KeyContainer');
 
-    // Проверка ответа наличие ошибок при обработке получателем соответствующего зашифрованного запроса
+    // РџСЂРѕРІРµСЂРєР° РѕС‚РІРµС‚Р° РЅР°Р»РёС‡РёРµ РѕС€РёР±РѕРє РїСЂРё РѕР±СЂР°Р±РѕС‚РєРµ РїРѕР»СѓС‡Р°С‚РµР»РµРј СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰РµРіРѕ Р·Р°С€РёС„СЂРѕРІР°РЅРЅРѕРіРѕ Р·Р°РїСЂРѕСЃР°
     if Not CheckFailedResponse(responseDoc) then
     begin
       descryptedResponse := DecryptSOAPResponse(hCryptoProvider, responseDoc);
